@@ -63,9 +63,9 @@ SELECT  manager_id "관리자",
         min(salary) "최소급여",
         max(salary) "최대급여"
 FROM employees
-group by manager_id, hire_date
-having hire_date >= '05/12/31' 
-    and round(avg(salary), 0) >= 5000
+where hire_date > '05/12/31' --처음에 입사일만 뺐을 때 안 됐는데 where문 순서 틀려서 안 된듯.
+group by manager_id
+having round(avg(salary), 0) >= 5000 --having에 입사일 조건을 넣기 위해 group by에 입사일 넣으면 manager_id가 중복으로 나옴.
 order by round(avg(salary), 0) desc; 
 
 --10. 직원 테이블에서 입사일 별로 직원 나누고 입사일 오름차 정렬
