@@ -118,7 +118,7 @@ where employee_id = 110;
 /*
 *** order by : 정렬 ***
 select 문(순서 고정)
-    select 절 (해당 데이터 projection은 order절 후 맨 마지막에 실행돼서 select에 없는 칼럼이라도 where, order절은 적용됨)
+    select 절 (해당 데이터 projection은 order절(마지막) 직전에 실행돼서 select에 없는 칼럼이라도 where, order절은 적용됨)
     from 절
     where 절
     order by 절 (위에 거 다 하고 마지막에 순서 정하는 거. 이 절 적용하기 전엔 데이터들이 임시로 있는 상태라 순서 고정 안 됨.)
