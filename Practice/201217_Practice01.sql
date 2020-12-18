@@ -45,7 +45,7 @@ order by salary desc;
 --6. 직원 테이블에서 이름, 월급, 입사일, 부서번호 출력하는데 부서번호 10 90 100이고 입사일 표기는 1977-12
 SELECT  first_name,
         salary,
-        to_char(hire_date, 'YYYY-MM'),
+        to_char(hire_date, 'YYYY-MM') hire_date, --컬럼에 이 함수가 그대로 들어가니까 컬럼명 다시 정해서 알기 쉽게 함
         department_id            
 FROM employees
 where department_id in (10, 90, 100);
@@ -55,6 +55,10 @@ SELECT  first_name,
         salary
 FROM employees
 where first_name like ('%S%') or first_name like ('%s%');
+/*
+해설
+where upper(first_name) like '%S%' 로 조건 추가할 필요없이 한번에 가능
+*/
 
 --8. 부서 테이블에서 부서이름 출력하는데 이름 긴 순서대로
 SELECT  department_name
@@ -64,8 +68,8 @@ order by LENGTH(department_name) desc;
 --9. 국가 테이블에서 국가명 대문자 출력인데 지사가 있을 것으로 예상되는 국가고 오름차
 SELECT  upper(country_name)
 FROM countries
-where country_name is not null
-order by country_name asc;
+where country_name is not null --필요없는 부분
+order by country_name asc; --컬럼명 출력부분과 똑같이 맞추는 게 좋음 > order by upper(country_name) asc; 
 
 --10. 직원 테이블에서 이름, 월급, 전번, 입사일 출력하는데 03/12/31 이전 입사한 직원이고 전번은 545-343-3433 형태
 --처음에 replace가 아니라 to_char(phone_number, '999-999-9999') 이렇게 하니까 오류났는데 전번은 숫자가 아니라 문자열이라 그럼
