@@ -63,7 +63,7 @@ SELECT  manager_id "관리자",
         min(salary) "최소급여",
         max(salary) "최대급여"
 FROM employees
-where hire_date > '05/12/31' --처음에 입사일만 뺐을 때 안 됐는데 where문 순서 틀려서 안 된듯.
+where hire_date > '05/12/31' --처음에 입사일만 뺐을 때 안 됐는데 where절 순서 틀려서 안 된듯.
 group by manager_id
 having round(avg(salary), 0) >= 5000 --having에 입사일 조건을 넣기 위해 group by에 입사일 넣으면 manager_id가 중복으로 나옴.
 order by round(avg(salary), 0) desc; 
@@ -74,7 +74,7 @@ SELECT  first_name,
         case when hire_date < '02/12/31' then '창립멤버'
             when hire_date > '02/12/31' and hire_date < '04/01/01' then '03년입사'
             when hire_date > '03/12/31' and hire_date < '05/01/01' then '04년입사'
-            else '상장이후입사' --''는 표시할 내용이지 컬럼명이 아님
+            else '상장이후입사' --''는 표시할 내용(문자열)이지 컬럼명이 아님
         end optDate
 FROM employees
 order by hire_date asc;
