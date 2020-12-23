@@ -48,10 +48,36 @@ order by salary desc;
 (9건)
 */
 --1.직원 조건 : 05년 이후 입사, 매니저별 평균급여 5000이상 2.매니저별 최대/최소 급여
-SELECT  manager_id,
-        first_name
-FROM employees
-group by manager_id;
+SELECT  emp.manager_id "매니저아이디",
+        mid.ma_name "매니저이름",
+        avgs.avg_sal "매니저별평균급여",
+        mins.min_sal "매니저별최소급여",
+        maxs.max_sal "매니저별최대급여"
+FROM employees emp
+, (SELECT  em.manager_id ma_id,
+        ma.first_name ma_name
+    FROM employees em, employees ma
+    where em.manager_id = ma.employee_id
+    group by em.manager_id, ma.first_name) mid
+, (SELECT  manager_id,
+            avg(salary) avg_sal
+    FROM employees
+    group by manager_id) avgs
+, (SELECT  manager_id,
+            min(salary) min_sal
+    FROM employees
+    group by manager_id) mins
+, (SELECT  manager_id,
+            max(salary) max_sal
+    FROM employees
+    group by manager_id) maxs
+where emp.manager_id = mid.manager_id
+and mid.manager_id = avgs.manager_id
+and avgs.manager_id = mins.manager_id
+and emp.manager_id = maxs.manager_id;??????????????????????
+
+
+
 
 
 
