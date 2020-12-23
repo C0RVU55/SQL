@@ -20,14 +20,16 @@ select문은 테이블을 불러와도 다 가상의 테이블 만들어서 하�
 --급여 10000이상이면 그냥 where절 쓰면 되는데 조건이 위와 같다면? 매번 den의 월급이 바뀐다면?
 --> where절에 질문(den의 급여는?)을 조건으로 넣으면 됨.
 
---정렬 되도록 안 함.
+--정렬은 되도록 쓰지 않음.
 
---단일행(괄호 안 값이 1줄짜리) : < > <= 이런 거 쓰고 주의할 점 <> 같지 않다
+/*****
+단일행(괄호 안 값이 1줄짜리) :  => <= 이런 거 쓰고 주의할 점 <> 같지 않다
+*****/
 SELECT  employee_id,
         first_name,
         salary
 FROM employees
-where salary > (SELECT  salary --조건에 걸려고 하는 컬럼만 넣어야 됨
+where salary > (SELECT  salary --***조건에 걸려고 하는 컬럼만 넣어야 됨***
                 FROM employees
                 where first_name = 'Den'); --'den의 급여는?' 이 질문(쿼리)를 괄호 쳐서 다른 쿼리에 넣으면 됨.
                 
@@ -47,8 +49,10 @@ SELECT  first_name,
 FROM employees
 where salary < (SELECT  avg(salary) 
                 FROM employees);
-                
---다중행 연산자(괄호 안 값이 여러 개, 리스트) : any, all, in...
+
+/*****                
+다중행 연산자(괄호 안 값이 여러 개, 리스트) : any, all, in...
+*****/
 --1.부서번호가 110인 직원 이름, 급여 2.이 직원들과 급여가 같은 직원의 사번, 이름, 급여
 --where절이 salary = 12008 or salary = 8300이랑 in (12008, 8300)랑 같은 상황
 SELECT  employee_id,
@@ -82,9 +86,9 @@ where (department_id, salary) in (SELECT department_id,
                  FROM employees
                  where department_id = 110);
                  
-/*
-테이블에서 조인
-*/
+/*****
+테이블에서 join
+*****/
 --각 부서별로 최고급여 받는 사원 출력
 --가상테이블 직원테이블과 부서별 급여 테이블을 뽑고 급여 테이블을 조인시키는데 부서번호와 급여 같은 것만 출력
 SELECT  e.department_id,
