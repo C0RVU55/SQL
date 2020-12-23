@@ -98,15 +98,53 @@ and em.salary = sa.salary
 order by em.salary desc;
 
 /*
-문제6.
-각 업무(job) 별로 연봉(salary)의 총합을 구하고자 합니다. 
-연봉 총합이 가장 높은 업무부터 업무명(job_title)과 연봉 총합을 조회하시오 
-(19건)
+6. 각 업무(job) 별로 연봉(salary)의 총합을 구하고자 합니다. 
+연봉 총합이 가장 높은 업무부터 업무명(job_title)과 연봉 총합을 조회하시오 (19건)
 */
-
+--1.업무별로 묶고 연봉 총합 2.연봉 총합(내림차)
+SELECT  jo.job_title "업무명",
+        em.salary "연봉 총합"
+FROM jobs jo, (SELECT  job_id,
+                        sum(salary) salary
+                FROM employees
+                group by job_id) em
+where jo.job_id = em.job_id
+order by em.salary desc;
 
 /*
-문제7.
-자신의 부서 평균 급여보다 연봉(salary)이 많은 직원의 직원번호(employee_id), 이름(first_name)과 급여(salary)을 조회하세요 
-(38건)
+7. 자신의 부서 평균 급여보다 연봉(salary)이 많은 직원의 
+직원번호(employee_id), 이름(first_name)과 급여(salary)을 조회하세요 (38건)
 */
+--1.부서 평균 급여 2.평균 급여와 연봉 비교
+SELECT  em.employee_id "직원번호",
+        em.first_name "이름",
+        em.salary "급여"
+FROM employees em, (SELECT  department_id,
+                            avg(salary) salary
+                    FROM employees
+                    group by department_id) a
+where em.department_id = a.department_id
+and em.salary > a.salary;
+
+/*
+8. 직원 입사일이 11번째에서 15번째의 직원의 사번, 이름, 급여, 입사일을 입사일 순서로 출력하세요
+*/
+--1.입사일 오름차 2.일련번호 11-15
+SELECT  rn,
+        r.employee_id "사번",
+        r.first_name "이름",
+        r.salary "급여",
+        r.hire_date "입사일"
+FROM (SELECT  rownum rn,
+            hi.employee_id,
+            hi.first_name,
+            hi.salary,
+            hi.hire_date
+    FROM (select  em.employee_id,
+                em.first_name,
+                em.salary,
+                em.hire_date
+        from employees em
+        order by hire_Date asc) hi) r
+where rn >= 11 
+and rn <= 15;
