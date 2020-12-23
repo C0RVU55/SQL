@@ -82,8 +82,18 @@ where salary <any (SELECT  salary
 --1. 부서별 최고 급여 2.직원 정보
 
 --조건절 비교
-
-
+SELECT  employee_id "사번",
+        first_name "이름",
+        salary "급여",
+        department_id "부서번호"
+FROM employees
+where (department_id, salary)
+in (SELECT department_id,
+            max(salary)
+    from employees
+    group by department_id)
+order by salary desc;
+    
 --테이블 조인
 SELECT  em.employee_id "사번",
         em.first_name "이름",
