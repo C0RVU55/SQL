@@ -59,7 +59,14 @@ order by salary desc;
 부서가 없는 직원(Kimberely)도 표시합니다.
 (106명)
 */
-
+--1.직원테이블에 부서테이블 조인 2.직원테이블 자기참조해서 이름 출력 3.null값출력을 위해 em, ma을 자기참조로 묶고 부서테이블 아우터조인시키기
+SELECT  em.employee_id "사번",
+        em.first_name "이름",
+        de.department_name "부서명",
+        ma.first_name "매니저이름"
+FROM employees em, departments de, employees ma
+where em.department_id = de.department_id
+and em.manager_id = ma.employee_id;
 
 /*
 문제5.
