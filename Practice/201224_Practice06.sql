@@ -97,11 +97,25 @@ where a.author_id = b.author_id;
 
 --commit
 commit;
+rollback;
 
 --데이터 변경 : 강풀 작가정보를 '서울특별시'로
 update author
 set author_desc = '서울특별시'
 where author_id = 5;
+
+--201228 자바 연동 수업 (update)
+update author
+set author_desc = '우리집'
+where author_id = 21;
+
+DELETE FROM author
+where author_id = 21;
+
+SELECT  author_id,
+        author_name,
+        author_desc
+FROM author;
 
 --author테이블에서 기안84 데이터 삭제
 DELETE FROM author
