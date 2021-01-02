@@ -38,7 +38,7 @@ in (SELECT  department_id,
     group by department_id)
 order by salary desc;
 
-/*
+/*###
 3. 매니저별로 평균급여 최소급여 최대급여를 알아보려고 한다.
 -통계대상(직원)은 2005년 이후의 입사자 입니다.
 -매니저별 평균급여가 5000이상만 출력합니다.
@@ -51,6 +51,35 @@ order by salary desc;
 --직원테이블 하나 두고 여기에 매니저이름, 매니저별 급여 평균, 매니저별 최저급여, 매니저별 최고급여 테이블 다 만들어서 이퀄조인 - 실패
 --직원테이블 하나 두고 매니저이름 이퀄조인하고 매니저별 평균/최저/최고급여 묶기?
 
+-- 1. 매니저별 담당직원들의 평균급여 최소급여 최대급여 조회
+-- -통계대상(직원)은 2005년 1월 1일 이후의 입사자 입니다.
+-- -매니저별 담당직원들의 평균급여는 소수점 첫째자리에서 반올림 합니다.
+select  emp.manager_id "매니저아이디",
+        round(avg(emp.salary),1) "매니저별평균급여",
+        min(emp.salary) "매니저별최소급여",
+        max(emp.salary) "매니저별최대급여"
+from employees emp, employees man
+where emp.manager_id = man.employee_id
+and emp.hire_date >= '05/01/01'
+group by emp.manager_id;
+
+-- employees 테이블과 다시 조인
+select  manSal."매니저아이디",
+        em.first_name "매니저이름",
+        manSal."매니저별평균급여" "매니저별평균급여",
+        manSal."매니저별최소급여" "매니저별최소급여",
+        manSal."매니저별최대급여" "매니저별최대급여"
+from (select  emp.manager_id "매니저아이디",
+              round(avg(emp.salary),1) "매니저별평균급여",
+              min(emp.salary) "매니저별최소급여",
+              max(emp.salary) "매니저별최대급여"
+      from employees emp, employees man
+      where emp.manager_id = man.employee_id
+      and emp.hire_date >= '05/01/01'
+      group by emp.manager_id) manSal, employees em
+where mansal."매니저아이디" = em.employee_id
+and mansal."매니저별평균급여" >= 5000
+order by mansal."매니저별평균급여" desc;
 
 
 /*
@@ -68,13 +97,66 @@ FROM employees em, departments de, employees ma
 where em.department_id = de.department_id
 and em.manager_id = ma.employee_id;
 
-/*
+/*###
 문제5.
 2005년 이후 입사한 직원중에 입사일이 11번째에서 20번째의 직원의 
 사번, 이름, 부서명, 급여, 입사일을 입사일 순서로 출력하세요
 */
+select  employee_id,
+        first_name,
+        department_name,
+        salary,
+        hire_date
+from employees emp, departments dep
+where emp.department_id = dep.department_id
+and hire_date >= '05/01/01';
 
-/*
+--rownum
+select  rownum,
+        employee_id,
+        first_name,
+        department_name,
+        salary,
+        hire_date
+from (select  employee_id,
+              first_name,
+              department_name,
+              salary,
+              hire_date
+      from employees emp, departments dep
+      where emp.department_id = dep.department_id
+      and hire_date >= '05/01/01') o
+order by hire_date asc;
+
+-- 최종
+-- 2005년 이후 입사한 직원중에 입사일이 11번째에서 20번째의 직원의 
+-- 사번, 이름, 부서명, 급여, 입사일을 입사일 순서로 출력하세요
+select  rm,
+        employee_id,
+        first_name,
+        department_name,
+        salary,
+        hire_date
+from (select    rownum as rm,
+                employee_id,
+                first_name,
+                department_name,
+                salary,
+                hire_date
+        from (select  employee_id,
+                      first_name,
+                      department_name,
+                      salary,
+                      hire_date
+              from employees emp, departments dep
+              where emp.department_id = dep.department_id
+              and hire_date >= '05/01/01'
+              order by hire_date asc) o
+        ) result
+where rm >= 11
+and rm <= 20;
+
+/*###
 6. 가장 늦게 입사한 직원의 이름(first_name last_name)과 연봉(salary)과 근무하는 부서 이름(department_name)은?
 */
 SELECT  rn,
@@ -94,6 +176,7 @@ FROM (SELECT  rownum rn,
         order by hire_date desc) h) hi
 where rn = 1;
 
+------------------------------------------
 
 
 /*
