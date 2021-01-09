@@ -51,9 +51,8 @@ order by salary desc;
 --직원테이블 하나 두고 여기에 매니저이름, 매니저별 급여 평균, 매니저별 최저급여, 매니저별 최고급여 테이블 다 만들어서 이퀄조인 - 실패
 --직원테이블 하나 두고 매니저이름 이퀄조인하고 매니저별 평균/최저/최고급여 묶기?
 
--- 1. 매니저별 담당직원들의 평균급여 최소급여 최대급여 조회
--- -통계대상(직원)은 2005년 1월 1일 이후의 입사자 입니다.
--- -매니저별 담당직원들의 평균급여는 소수점 첫째자리에서 반올림 합니다.
+--매니저별 담당직원들의 평균급여 최소급여 최대급여 조회
+--통계대상(직원)은 2005년 1월 1일 이후 / 매니저 평균급여 소수점 첫째자리에서 반올림
 select  emp.manager_id "매니저아이디",
         round(avg(emp.salary),1) "매니저별평균급여",
         min(emp.salary) "매니저별최소급여",
@@ -63,12 +62,13 @@ where emp.manager_id = man.employee_id
 and emp.hire_date >= '05/01/01'
 group by emp.manager_id;
 
--- employees 테이블과 다시 조인
-select  manSal."매니저아이디",
+--employees 테이블과 다시 조인
+--매니저별 평균급여 5000 이상 / 평균급여 내림차
+select  ms."매니저아이디",
         em.first_name "매니저이름",
-        manSal."매니저별평균급여" "매니저별평균급여",
-        manSal."매니저별최소급여" "매니저별최소급여",
-        manSal."매니저별최대급여" "매니저별최대급여"
+        ms."매니저별평균급여" "매니저별평균급여",
+        ms."매니저별최소급여" "매니저별최소급여",
+        ms."매니저별최대급여" "매니저별최대급여"
 from (select  emp.manager_id "매니저아이디",
               round(avg(emp.salary),1) "매니저별평균급여",
               min(emp.salary) "매니저별최소급여",
@@ -76,10 +76,10 @@ from (select  emp.manager_id "매니저아이디",
       from employees emp, employees man
       where emp.manager_id = man.employee_id
       and emp.hire_date >= '05/01/01'
-      group by emp.manager_id) manSal, employees em
-where mansal."매니저아이디" = em.employee_id
-and mansal."매니저별평균급여" >= 5000
-order by mansal."매니저별평균급여" desc;
+      group by emp.manager_id) ms, employees em
+where ms."매니저아이디" = em.employee_id
+and ms."매니저별평균급여" >= 5000
+order by ms."매니저별평균급여" desc;
 
 
 /*
@@ -97,11 +97,13 @@ FROM employees em, departments de, employees ma
 where em.department_id = de.department_id
 and em.manager_id = ma.employee_id;
 
+
 /*###
 문제5.
 2005년 이후 입사한 직원중에 입사일이 11번째에서 20번째의 직원의 
 사번, 이름, 부서명, 급여, 입사일을 입사일 순서로 출력하세요
 */
+--먼저 where절 넣고 직원, 부서 테이블 조인
 select  employee_id,
         first_name,
         department_name,
@@ -111,7 +113,7 @@ from employees emp, departments dep
 where emp.department_id = dep.department_id
 and hire_date >= '05/01/01';
 
---rownum
+--rownum / 입사일 오름차
 select  rownum,
         employee_id,
         first_name,
@@ -128,15 +130,14 @@ from (select  employee_id,
       and hire_date >= '05/01/01') o
 order by hire_date asc;
 
--- 최종
--- 2005년 이후 입사한 직원중에 입사일이 11번째에서 20번째의 직원의 
--- 사번, 이름, 부서명, 급여, 입사일을 입사일 순서로 출력하세요
+-- 합침 / 입사일 11번째에서 20번째 직원
+
 select  rm,
-        employee_id,
-        first_name,
-        department_name,
-        salary,
-        hire_date
+        employee_id "사번",
+        first_name "이름",
+        department_name "부서명",
+        salary "급여",
+        hire_date "입사일"
 from (select    rownum as rm,
                 employee_id,
                 first_name,
@@ -159,22 +160,13 @@ and rm <= 20;
 /*###
 6. 가장 늦게 입사한 직원의 이름(first_name last_name)과 연봉(salary)과 근무하는 부서 이름(department_name)은?
 */
-SELECT  rn,
-        hi.first_name||' '||hi.last_name,
-        hi.salary,
-        hi.department_name
-FROM (SELECT  rownum rn,
-            h.first_name||' '||h.last_name,
-            h.salary,
-            h.department_name
-    FROM (SELECT  em.hire_date,
-                em.first_name||' '||em.last_name,
-                em.salary,
-                de.department_name
-        FROM employees em, departments de
-        where em.department_id = de.department_id
-        order by hire_date desc) h) hi
-where rn = 1;
+SELECT  first_name || ' ' || last_name,
+        salary,
+        department_name
+FROM employees em, departments de
+where em.department_id = de.department_id
+and em.hire_date = (SELECT  max(hire_date)
+                    FROM employees);
 
 ------------------------------------------
 
@@ -184,19 +176,6 @@ where rn = 1;
 직원번호(employee_id), 이름(firt_name), 성(last_name)과  업무(job_title), 연봉(salary)을 조회하시오.
 */
 --1.평균 연봉이 가장 높은 부서 연봉 2.이 부서 직원들 정보
-SELECT  e.employee_id,
-        e.first_name,
-        e.last_name,
-        j.job_title,
-        e.salary
-FROM employees e, jobs j
-???
-
-SELECT  max(s.salary)
-FROM (SELECT  department_id,
-            avg(salary) salary
-    FROM employees
-    group by department_id) s;
 
 
 /*
