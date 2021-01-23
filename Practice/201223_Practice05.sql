@@ -168,25 +168,139 @@ where em.department_id = de.department_id
 and em.hire_date = (SELECT  max(hire_date)
                     FROM employees);
 
-------------------------------------------
-
 
 /*
 7. 평균연봉(salary)이 가장 높은 부서 직원들의 
 직원번호(employee_id), 이름(firt_name), 성(last_name)과  업무(job_title), 연봉(salary)을 조회하시오.
 */
---1.평균 연봉이 가장 높은 부서 연봉 2.이 부서 직원들 정보
+--1.평균연봉이 가장 높은 부서 연봉 2.이 부서 직원들 정보
+--부서별 평균연봉
+SELECT  department_id,
+        avg(salary)
+FROM employees
+group by department_id;
 
+--가장 높은 평균연봉
+SELECT  max(avg(salary))
+FROM employees
+group by department_id;
+
+--1.부서별 가장 높은 평균 연봉 (최고 평균연봉과 부서별 평균연봉을 조인)
+SELECT  avSl.department_id,
+        avSl.avSal
+FROM (SELECT  department_id,
+              avg(salary) avSal
+      FROM employees
+      group by department_id) avSl, (SELECT  max(avg(salary)) mxSal
+                                     FROM employees
+                                     group by department_id) mxSl
+where avSl.avSal = mxSl.mxSal;
+
+--2.직원 정보
+SELECT  em.employee_id,
+        first_name,
+        last_name,
+        job_title,
+        salary
+FROM employees em, jobs jo, (SELECT  avSl.department_id,
+                                     avSl.avSal
+                             FROM (SELECT  department_id,
+                                           avg(salary) avSal
+                                   FROM employees
+                                   group by department_id) avSl, (SELECT  max(avg(salary)) mxSal
+                                                                  FROM employees
+                                                                  group by department_id) mxSl
+                             where avSl.avSal = mxSl.mxSal) sal
+where em.job_id = jo.job_id
+and em.department_id = sal.department_id;
 
 /*
 8. 평균 급여(salary)가 가장 높은 부서는? 
 */
+--1.부서 중 가장 높은 평균급여 2.부서명
+--부서별 평균급여
+SELECT  department_id,
+        avg(salary)
+FROM employees
+group by department_id;
+
+--부서 중 최고 평균급여
+SELECT  max(avg(salary))
+FROM employees
+group by department_id;
+
+--1.부서 중 가장 높은 평균급여
+SELECT  avSl.department_id,
+        avSl.avSal
+FROM (SELECT  department_id,
+              avg(salary) avSal 
+      FROM employees
+      group by department_id) avSl, (SELECT  max(avg(salary)) mxSal
+                                     FROM employees
+                                     group by department_id) mxSl
+where avSl.avSal = mxSl.mxSal;
+
+--2.부서명
+SELECT  department_name
+FROM departments de, (SELECT  avSl.department_id,
+                                            avSl.avSal
+                                    FROM (SELECT  department_id,
+                                                  avg(salary) avSal 
+                                          FROM employees
+                                          group by department_id) avSl, (SELECT  max(avg(salary)) mxSal
+                                                                         FROM employees
+                                                                         group by department_id) mxSl
+                                    where avSl.avSal = mxSl.mxSal) sal
+where de.department_id = sal.department_id;
 
 
 /*문제9.
 평균 급여(salary)가 가장 높은 지역은? 
 */
+--1.지역 중 가장 높은 평균급여 2.지역명
+--지역별 평균급여 (부서아이디>도시아이디>나라아이디>지역아이디)
+SELECT  re.region_name name,
+        avg(em.salary) avSal
+FROM employees em, departments de, locations lo, countries co, regions re
+where em.department_id = de.department_id
+and de.location_id = lo.location_id
+and lo.country_id = co.country_id
+and co.region_id = re.region_id
+group by re.region_name
+order by avSal desc;
+
+--최고 평균급여 rownum(1) + 지역명(2)
+SELECT  rownum,
+        sal.name
+FROM (SELECT  re.region_name name,
+                avg(em.salary) avSal
+        FROM employees em, departments de, locations lo, countries co, regions re
+        where em.department_id = de.department_id
+        and de.location_id = lo.location_id
+        and lo.country_id = co.country_id
+        and co.region_id = re.region_id
+        group by re.region_name
+        order by avSal desc) sal
+where rownum = 1;
 
 /*문제10.
 평균 급여(salary)가 가장 높은 업무는? 
 */
+--1.업무 중 가장 높은 평균급여 2.업무명
+--업무별 평균급여
+SELECT  job_id,
+        avg(salary)
+FROM employees
+group by job_id
+order by avg(salary) desc;
+
+--최고 평균급여 rownum(1) + 업무명(2)
+SELECT  rownum,
+        jo.job_title
+FROM jobs jo, (SELECT  job_id,
+                        avg(salary)
+                FROM employees
+                group by job_id
+                order by avg(salary) desc) sal
+where jo.job_id = sal.job_id
+and rownum = 1;
